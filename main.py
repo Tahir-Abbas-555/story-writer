@@ -6,14 +6,34 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 import os
 from langchain_google_genai import ChatGoogleGenerativeAI
+from fastapi.middleware.cors import CORSMiddleware
+
 
 class StoryRequest(BaseModel):
     prompt: str
     Style: str
 
 load_dotenv()
-client = genai.Client(api_key=os.getenv("GEMINI_API"))
+
 app = FastAPI()
+
+client = genai.Client(api_key=os.getenv("GEMINI_API"))
+
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/transcribe")
 async def transcribe_audio(file: UploadFile = File(...)):
